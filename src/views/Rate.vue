@@ -5,11 +5,11 @@
         <div>Rate as of: {{currentTime}} ({{currentLocale}})</div>
       </v-flex>
       <v-flex align-center>
-        <div class="title">Kirim USD to Indonesia:</div>
+        <div class="title">Kirim USD ke Indonesia:</div>
         <div class="headline">Rp {{usdToIdr.toLocaleString()}}</div>
       </v-flex>
       <v-flex align-content-center>
-        <div class="title">Kirim IDR to USA:</div>
+        <div class="title">Kirim Rupiah ke USA:</div>
         <div class="headline">Rp {{idrToUsd.toLocaleString()}}</div>
       </v-flex>
       <v-spacer></v-spacer>
