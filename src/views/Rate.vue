@@ -1,8 +1,9 @@
 <template>
   <v-container fill-height>
     <v-layout justify-center align-start column>
-      <v-flex>
-        <div>Rate as of: {{currentTime}} ({{currentLocale}})</div>
+      <v-flex d-inline-flex align-center>
+        <div class="pr-3">Rate as of: {{currentTime}} ({{currentLocale}})</div>
+        <v-progress-circular v-show="loadingRate" indeterminate class="pl-3"></v-progress-circular>
       </v-flex>
       <v-flex align-center>
         <div class="title">Kirim USD ke Indonesia:</div>
@@ -29,6 +30,7 @@ export default class Home extends Vue {
   private idrToUsd: number = 0;
   private currentTime: string = '';
   private currentLocale: string = '';
+  private loadingRate: boolean = true;
 
   public created() {
     this.currentLocale = moment.locale();
@@ -38,6 +40,7 @@ export default class Home extends Vue {
         const data = response.data[0];
         this.usdToIdr = data.usdToIdrRounded;
         this.idrToUsd = data.idrToUsdRounded;
+        this.loadingRate = false;
       });
   }
 }
