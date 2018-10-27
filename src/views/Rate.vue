@@ -35,7 +35,7 @@ export default class Rate extends Vue {
   public created() {
     this.currentLocale = moment.locale();
     this.currentTime = moment().format('LLL');
-    axios.get('/service/rate/latest')
+    axios.get('/services/rate/latest')
       .then((response) => {
         const data = response.data[0];
         this.usdToIdr = data.usdToIdrRounded;

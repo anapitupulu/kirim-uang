@@ -1,10 +1,10 @@
 module.exports = {
   devServer: {
     proxy: {
-      '/service': {
+      '/services': {
         changeOrigin: true,
         target: 'https://kirimuang-service.herokuapp.com',
-        pathRewrite: {'^/service': ''},
+        pathRewrite: {'^/services': ''},
       },
     },
   },

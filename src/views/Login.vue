@@ -50,7 +50,7 @@ export default class Login extends Vue {
 
   private async login() {
     if ((this.$refs.loginForm as any).validate()) {
-      await axios.post('/service/authenticate', {
+      await axios.post('/services/authenticate', {
         email: this.email,
         password: this.password,
       }).catch((err: Error) => {

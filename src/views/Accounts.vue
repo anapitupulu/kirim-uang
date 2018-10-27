@@ -14,19 +14,29 @@
             <v-container grid-list-md>
               <v-layout wrap>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
+                  <v-text-field v-model="editedItem.name" label="Name"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
+                  <v-text-field v-model="editedItem.bank" label="Bank"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
+                  <v-text-field v-model="editedItem.accountNumber" label="Account #"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
+                  <v-text-field v-model="editedItem.branch" label="Branch"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
+                  <span class="subheading">Location:</span>
+                  <v-radio-group v-model="editedItem.location" row>
+                    <v-radio label="Indonesia" value="Indonesia"></v-radio>
+                    <v-radio label="USA" value="USA"></v-radio>
+                  </v-radio-group>
+                </v-flex>
+                <v-flex xs12 sm6 md4>
+                  <v-text-field v-model="editedItem.phone" label="Phone"></v-text-field>
+                </v-flex>
+                <v-flex xs12 sm6 md4>
+                  <span class="body-2 red--text" v-show="failedToSave">Failure saving account!</span>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -42,16 +52,17 @@
     </v-toolbar>
     <v-data-table
       :headers="headers"
-      :items="desserts"
+      :items="accounts"
       hide-actions
       class="elevation-1"
     >
       <template slot="items" slot-scope="props">
         <td>{{ props.item.name }}</td>
-        <td class="text-xs-right">{{ props.item.calories }}</td>
-        <td class="text-xs-right">{{ props.item.fat }}</td>
-        <td class="text-xs-right">{{ props.item.carbs }}</td>
-        <td class="text-xs-right">{{ props.item.protein }}</td>
+        <td class="text-xs-right">{{ props.item.bank }}</td>
+        <td class="text-xs-right">{{ props.item.accountNumber }}</td>
+        <td class="text-xs-right">{{ props.item.branch }}</td>
+        <td class="text-xs-right">{{ props.item.location }}</td>
+        <td class="text-xs-right">{{ props.item.phone }}</td>
         <td class="justify-center layout px-0">
           <v-icon
             small
@@ -78,26 +89,39 @@
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 
+interface Account {
+  id: string;
+  name: string;
+  bank: string;
+  accountNumber: string;
+  branch: string;
+  location: string;
+  phone: string;
+}
+
 @Component({})
 export default class Accounts extends Vue {
+  private failedToSave: boolean = false;
   private dialog: boolean = false;
   private headers: any[] = [
     {
-      text: 'Dessert (100g serving)',
+      text: 'Name',
       align: 'left',
-      sortable: false,
+      sortable: true,
       value: 'name',
     },
-    { text: 'Calories', value: 'calories' },
-    { text: 'Fat (g)', value: 'fat' },
-    { text: 'Carbs (g)', value: 'carbs' },
-    { text: 'Protein (g)', value: 'protein' },
-    { text: 'Actions', value: 'name', sortable: false },
+    { text: 'Bank', value: 'bank', sortable: true },
+    { text: 'Account #', value: 'accountNumber' },
+    { text: 'Branch', value: 'branch' },
+    { text: 'Location', value: 'location', sortable: true },
+    { text: 'Phone', value: 'phone' },
   ];
-  private desserts: any[] = [];
+  private accounts: Account[] = [];
   private editedIndex: number = -1;
-  private editedItem: any = { name: '', calories: 0, fat: 0, carbs: 0, protein: 0 };
-  private defaultItem: any = { name: '', calories: 0, fat: 0, carbs: 0, protein: 0 };
+  private editedItem: Account =
+    { id: '', name: '', bank: '', accountNumber: '', branch: '', location: 'Indonesia', phone: '' };
+  private defaultItem: Account =
+    { id: '', name: '', bank: '', accountNumber: '', branch: '', location: 'Indonesia', phone: '' };
 
   get formTitle() {
     return this.editedIndex === -1 ? 'New Account' : 'Edit Account';
@@ -114,109 +138,45 @@ export default class Accounts extends Vue {
     this.initialize();
   }
 
-  private initialize() {
-    this.desserts = [
-      {
-        name: 'Frozen Yogurt',
-        calories: 159,
-        fat: 6.0,
-        carbs: 24,
-        protein: 4.0,
-      },
-      {
-        name: 'Ice cream sandwich',
-        calories: 237,
-        fat: 9.0,
-        carbs: 37,
-        protein: 4.3,
-      },
-      {
-        name: 'Eclair',
-        calories: 262,
-        fat: 16.0,
-        carbs: 23,
-        protein: 6.0,
-      },
-      {
-        name: 'Cupcake',
-        calories: 305,
-        fat: 3.7,
-        carbs: 67,
-        protein: 4.3,
-      },
-      {
-        name: 'Gingerbread',
-        calories: 356,
-        fat: 16.0,
-        carbs: 49,
-        protein: 3.9,
-      },
-      {
-        name: 'Jelly bean',
-        calories: 375,
-        fat: 0.0,
-        carbs: 94,
-        protein: 0.0,
-      },
-      {
-        name: 'Lollipop',
-        calories: 392,
-        fat: 0.2,
-        carbs: 98,
-        protein: 0,
-      },
-      {
-        name: 'Honeycomb',
-        calories: 408,
-        fat: 3.2,
-        carbs: 87,
-        protein: 6.5,
-      },
-      {
-        name: 'Donut',
-        calories: 452,
-        fat: 25.0,
-        carbs: 51,
-        protein: 4.9,
-      },
-      {
-        name: 'KitKat',
-        calories: 518,
-        fat: 26.0,
-        carbs: 65,
-        protein: 7,
-      },
-    ];
+  private async initialize() {
+    this.accounts = (await axios.get('/services/account')).data;
   }
 
-  private editItem(item: any) {
-    this.editedIndex = this.desserts.indexOf(item);
+  private editItem(item: Account) {
+    this.editedIndex = this.accounts.indexOf(item);
     this.editedItem = Object.assign({}, item);
     this.dialog = true;
   }
 
   private deleteItem(item: any) {
-    const index = this.desserts.indexOf(item);
+    const index = this.accounts.indexOf(item);
     if (confirm('Are you sure you want to delete this item?')) {
-      this.desserts.splice(index, 1);
+      this.accounts.splice(index, 1);
     }
   }
 
   private close() {
     this.dialog = false;
+    this.failedToSave = false;
     setTimeout(() => {
       this.editedItem = Object.assign({}, this.defaultItem);
       this.editedIndex = -1;
     }, 300);
   }
 
-  private save() {
-    if (this.editedIndex > -1) {
-      Object.assign(this.desserts[this.editedIndex], this.editedItem);
-    } else {
-      this.desserts.push(this.editedItem);
+  private async save() {
+    try {
+      if (this.editedIndex > -1) {
+        const res: any = await axios.put('/services/account', this.editedItem);
+        Object.assign(this.accounts[this.editedIndex], this.editedItem);
+      } else {
+        const res: any = await axios.post('/services/account', this.editedItem);
+        this.accounts.push(this.editedItem);
+      }
+      this.close();
+    } catch (err) {
+      this.failedToSave = true;
     }
-    this.close();
   }
 }
 </script>
