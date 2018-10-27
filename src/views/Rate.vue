@@ -23,7 +23,7 @@ import moment from 'moment';
 import axios from 'axios';
 
 @Component({})
-export default class Home extends Vue {
+export default class Rate extends Vue {
   private drawer: boolean = false;
   private source: string = '';
   private usdToIdr: number = 0;
