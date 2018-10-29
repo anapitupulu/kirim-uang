@@ -3,7 +3,8 @@ module.exports = {
     proxy: {
       '/services': {
         changeOrigin: true,
-        target: 'https://kirimuang-service.herokuapp.com',
+        // target: 'https://kirimuang-service.herokuapp.com',
+        target: 'http://localhost:5000',
         pathRewrite: {'^/services': ''},
       },
     },

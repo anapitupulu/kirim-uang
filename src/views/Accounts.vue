@@ -89,7 +89,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 
-interface Account {
+export interface Account {
   id: string;
   name: string;
   bank: string;
