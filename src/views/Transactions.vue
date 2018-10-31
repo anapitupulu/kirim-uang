@@ -101,8 +101,8 @@
       class="elevation-1"
     >
       <template slot="items" slot-scope="props">
-        <td class="text-xs-right">{{ props.item.senderId }}</td>
-        <td class="text-xs-right">{{ props.item.receiverId }}</td>
+        <td class="text-xs-right">{{ props.item.senderName }}</td>
+        <td class="text-xs-right">{{ props.item.receiverName }}</td>
         <td class="text-xs-right">{{ props.item.usdAmount }}</td>
         <td class="text-xs-right">{{ props.item.idrAmount }}</td>
         <td class="text-xs-right">{{ props.item.rate }}</td>
@@ -140,7 +140,9 @@ import {Account} from './Accounts.vue';
 interface Transaction {
   id: string;
   senderId: string;
+  senderName: string;
   receiverId: string;
+  receiverName: string;
   usdAmount?: number;
   idrAmount?: number;
   rate: number;
@@ -175,9 +177,25 @@ export default class Transactions extends Vue {
   private transactions: Transaction[] = [];
   private editedIndex: number = -1;
   private editedItem: Transaction =
-    { id: '', senderId: '', receiverId: '', rate: 0, transferred: false, paid: false };
+    { id: '',
+      senderId: '',
+      receiverId: '',
+      senderName: '',
+      receiverName: '',
+      rate: 0,
+      transferred: false,
+      paid: false,
+    };
   private defaultItem: Transaction =
-    { id: '', senderId: '', receiverId: '', rate: 0, transferred: false, paid: false };
+    { id: '',
+      senderId: '',
+      receiverId: '',
+      senderName: '',
+      receiverName: '',
+      rate: 0,
+      transferred: false,
+      paid: false,
+    };
 
   private usdToIdr: boolean = true;
 
@@ -251,6 +269,12 @@ export default class Transactions extends Vue {
   private editItem(item: Transaction) {
     this.editedIndex = this.transactions.indexOf(item);
     this.editedItem = Object.assign({}, item);
+    this.senderTypeahead.items = [
+      { name: item.senderName, id: item.senderId },
+    ];
+    this.receiverTypeahead.items = [
+      { name: item.receiverName, id: item.receiverId },
+    ];
     this.dialog = true;
   }
 
