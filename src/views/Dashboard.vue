@@ -1,38 +1,24 @@
 <template>
-  <v-container>
-    <v-layout column>
-      <v-flex>
-        <v-tabs
-          centered
-          color="cyan"
-          dark
-          grow
-          icons-and-text>
-          <v-tabs-slider color="yellow"></v-tabs-slider>
-          <v-tab
-            href="#tab-transactions">
-            Transactions
-            <v-icon>reorder</v-icon>
-          </v-tab>
-          <v-tab
-            href="#tab-accounts">
-            Accounts
-            <v-icon>account_circle</v-icon>
-          </v-tab>
-
-          <v-tab-item
-            value="tab-transactions">
-            <transactions></transactions>
-          </v-tab-item>
-
-          <v-tab-item
-            value="tab-accounts">
-            <accounts></accounts>
-          </v-tab-item>
-        </v-tabs>
-      </v-flex>
-    </v-layout>
-  </v-container>
+  <v-card>
+    <router-view height="600px"></router-view>
+    <v-bottom-nav
+          @update:active="switchPage"
+          :active.sync="selectedPage"
+          :value="true">
+      <v-btn
+          flat
+          value="transactions">
+        <span>Transactions</span>
+        <v-icon></v-icon>
+      </v-btn>
+      <v-btn
+          flat
+          value="accounts">
+        <span>Accounts</span>
+        <v-icon></v-icon>
+      </v-btn>
+    </v-bottom-nav>
+  </v-card>
 </template>
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
@@ -47,5 +33,10 @@ import Accounts from './Accounts.vue';
   },
 })
 export default class Dashboard extends Vue {
+  private selectedPage = 'transactions';
+
+  private switchPage(newPage: string) {
+    this.$router.push({ name: newPage });
+  }
 }
 </script>
