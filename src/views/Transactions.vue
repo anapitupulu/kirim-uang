@@ -88,6 +88,7 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" flat @click.native="copy">Copy</v-btn>
             <v-btn color="blue darken-1" flat @click.native="close">Cancel</v-btn>
             <v-btn color="blue darken-1" flat @click.native="save">Save</v-btn>
           </v-card-actions>
@@ -135,6 +136,7 @@ import _map from 'lodash/map';
 import _find from 'lodash/find';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
+import {Clipboard} from 'ts-clipboard';
 import {Account} from './Accounts.vue';
 
 interface Transaction {
@@ -143,6 +145,9 @@ interface Transaction {
   senderName: string;
   receiverId: string;
   receiverName: string;
+  receiverBranch: string;
+  receiverBank: string;
+  receiverAccountNumber: string;
   usdAmount?: number;
   idrAmount?: number;
   rate: number;
@@ -182,6 +187,9 @@ export default class Transactions extends Vue {
       receiverId: '',
       senderName: '',
       receiverName: '',
+      receiverBranch: '',
+      receiverBank: '',
+      receiverAccountNumber: '',
       rate: 0,
       transferred: false,
       paid: false,
@@ -192,6 +200,9 @@ export default class Transactions extends Vue {
       receiverId: '',
       senderName: '',
       receiverName: '',
+      receiverBranch: '',
+      receiverBank: '',
+      receiverAccountNumber: '',
       rate: 0,
       transferred: false,
       paid: false,
@@ -307,6 +318,18 @@ export default class Transactions extends Vue {
     } catch (err) {
       this.failedToSave = true;
     }
+  }
+
+  private copy() {
+    const usdAmount: string = this.editedItem.usdAmount!.toLocaleString();
+    const idrAmount: string = this.editedItem.idrAmount!.toLocaleString();
+    const msg =
+`${this.editedItem.receiverName}
+${this.editedItem.receiverBank} ${this.editedItem.receiverBranch} ${this.editedItem.receiverAccountNumber}
+Kirim \$${usdAmount} x Rp ${this!.editedItem.rate.toLocaleString()} = Rp ${idrAmount}
+dari ${this.editedItem.senderName}`;
+
+    Clipboard.copy(msg);
   }
 
   private adjustIdrAmount(usdAmount: number): void {

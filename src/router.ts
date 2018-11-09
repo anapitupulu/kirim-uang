@@ -30,6 +30,7 @@ export default new Router({
         {
           path: 'dashboard',
           name: 'dashboard',
+          redirect: { name: 'transactions' },
           component: () => import(/* webpackChunkName: "about" */ './views/Dashboard.vue'),
           children: [
             {
