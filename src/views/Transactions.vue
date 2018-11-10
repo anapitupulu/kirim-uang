@@ -136,7 +136,6 @@ import _map from 'lodash/map';
 import _find from 'lodash/find';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import {Clipboard} from 'ts-clipboard';
 import clipboard from 'clipboard-polyfill';
 import {Account} from './Accounts.vue';
 
