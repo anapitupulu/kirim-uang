@@ -73,8 +73,6 @@
                       </v-flex>
                     </v-layout>
                   </v-flex>
-                  <!-- hidden textarea just for copying text to ios clipboard -->
-                  <textarea ref="clipboardElement" style="width: 0px">{{clipboardMessage}}</textarea>
                   <v-flex xs12 sm6 md4>
                     <v-textarea
                       label="Notes"
@@ -139,6 +137,7 @@ import _find from 'lodash/find';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 import {Clipboard} from 'ts-clipboard';
+import clipboard from 'clipboard-polyfill';
 import {Account} from './Accounts.vue';
 
 interface Transaction {
@@ -173,7 +172,6 @@ export default class Transactions extends Vue {
     clipboardElement: HTMLFormElement;
   };
 
-  private clipboardMessage: string = '';
   private failedToSave: boolean = false;
   private dialog: boolean = false;
   private headers: any[] = [
@@ -336,33 +334,7 @@ ${this.editedItem.receiverBank} ${this.editedItem.receiverBranch || ''} ${this.e
 Kirim \$${usdAmount} x Rp ${this!.editedItem.rate.toLocaleString()} = Rp ${idrAmount}
 dari ${this.editedItem.senderName}`;
 
-    this.clipboardMessage = msg;
-    await Vue.nextTick();
-
-    this.iosCopyToClipboard(this.$refs.clipboardElement);
-    Clipboard.copy(msg);
-
-  }
-
-  private iosCopyToClipboard(el: HTMLFormElement) {
-    const oldContentEditable = el.contentEditable;
-    const oldReadOnly = el.readOnly;
-    const range = document.createRange();
-
-    el.contentEditable = 'true';
-    el.readOnly = false;
-    range.selectNodeContents(el);
-
-    const s = window.getSelection();
-    s.removeAllRanges();
-    s.addRange(range);
-
-    el.setSelectionRange(0, 999999); // A big number, to cover anything that could be inside the element.
-
-    el.contentEditable = oldContentEditable;
-    el.readOnly = oldReadOnly;
-
-    document.execCommand('copy');
+    clipboard.writeText(msg);
   }
 
   private adjustIdrAmount(usdAmount: number): void {
