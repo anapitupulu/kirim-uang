@@ -8,10 +8,18 @@
          <v-list dense>
            <v-list-tile @click="">
              <v-list-tile-action>
-               <v-icon>home</v-icon>
+               <v-icon>show_chart</v-icon>
              </v-list-tile-action>
              <v-list-tile-content>
                <v-list-tile-title>Rate</v-list-tile-title>
+             </v-list-tile-content>
+           </v-list-tile>
+           <v-list-tile @click="goToLogin">
+             <v-list-tile-action>
+               <v-icon>account_circle</v-icon>
+             </v-list-tile-action>
+             <v-list-tile-content>
+               <v-list-tile-title>Login</v-list-tile-title>
              </v-list-tile-content>
            </v-list-tile>
          </v-list>
@@ -41,5 +49,9 @@ import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 export default class Home extends Vue {
   private drawer: boolean = false;
   private source: string = '';
+
+  private goToLogin() {
+    this.$router.push({name: 'login'});
+  }
 }
 </script>
