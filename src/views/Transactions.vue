@@ -327,7 +327,7 @@ export default class Transactions extends Vue {
     }
   }
 
-  private copy() {
+  private async copy() {
     const usdAmount: string = this.editedItem.usdAmount!.toLocaleString();
     const idrAmount: string = this.editedItem.idrAmount!.toLocaleString();
     const msg =
@@ -337,6 +337,7 @@ Kirim \$${usdAmount} x Rp ${this!.editedItem.rate.toLocaleString()} = Rp ${idrAm
 dari ${this.editedItem.senderName}`;
 
     this.clipboardMessage = msg;
+    await Vue.nextTick();
 
     this.iosCopyToClipboard(this.$refs.clipboardElement);
     Clipboard.copy(msg);
