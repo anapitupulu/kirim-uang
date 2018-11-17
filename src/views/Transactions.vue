@@ -102,11 +102,10 @@
       class="elevation-1"
     >
       <template slot="items" slot-scope="props">
-        <td class="text-xs-right">{{ props.item.senderName }}</td>
-        <td class="text-xs-right">{{ props.item.receiverName }}</td>
+        <td class="text-xs-right">{{ props.item.sender.name }}</td>
+        <td class="text-xs-right">{{ props.item.receiver.name }}</td>
         <td class="text-xs-right">{{ props.item.usdAmount }}</td>
         <td class="text-xs-right">{{ props.item.idrAmount }}</td>
-        <td class="text-xs-right">{{ props.item.rate }}</td>
         <td class="text-xs-right">{{ props.item.transferred }}</td>
         <td class="text-xs-right">{{ props.item.paid }}</td>
         <td class="justify-center layout px-0">
@@ -134,6 +133,8 @@
 <script lang="ts">
 import _map from 'lodash/map';
 import _find from 'lodash/find';
+import _keyBy from 'lodash/keyBy';
+import _findIndex from 'lodash/findIndex';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 import clipboard from 'clipboard-polyfill';
@@ -142,12 +143,9 @@ import {Account} from './Accounts.vue';
 interface Transaction {
   id: string;
   senderId: string;
-  senderName: string;
+  sender: Account;
   receiverId: string;
-  receiverName: string;
-  receiverBranch: string;
-  receiverBank: string;
-  receiverAccountNumber: string;
+  receiver: Account;
   usdAmount?: number;
   idrAmount?: number;
   rate: number;
@@ -165,11 +163,25 @@ interface TypeaheadStates {
   selected: string;
 }
 
+function getDefaultAccount() {
+  return {
+    id: '',
+    name: '',
+    bank: '',
+    accountNumber: '',
+    branch: '',
+    location: '',
+    phone: '',
+  };
+}
+
 @Component({})
 export default class Transactions extends Vue {
   public $refs!: {
     clipboardElement: HTMLFormElement;
   };
+
+  private accounts: {[id: string]: Account} = {};
 
   private failedToSave: boolean = false;
   private dialog: boolean = false;
@@ -178,7 +190,6 @@ export default class Transactions extends Vue {
     { text: 'Receiver', value: 'receiverId', sortable: true },
     { text: 'US $', value: 'usdAmount', sortable: true },
     { text: 'Rupiah', value: 'idrAmount', sortable: true },
-    { text: 'Rate', value: 'rate', sortable: true },
     { text: 'Transferred', value: 'transferred', sortable: true },
     { text: 'Paid', value: 'paid', sortable: true },
     { text: 'Notes', value: 'notes', sortable: true },
@@ -188,12 +199,9 @@ export default class Transactions extends Vue {
   private editedItem: Transaction =
     { id: '',
       senderId: '',
+      sender: getDefaultAccount(),
       receiverId: '',
-      senderName: '',
-      receiverName: '',
-      receiverBranch: '',
-      receiverBank: '',
-      receiverAccountNumber: '',
+      receiver: getDefaultAccount(),
       rate: 0,
       transferred: false,
       paid: false,
@@ -201,12 +209,9 @@ export default class Transactions extends Vue {
   private defaultItem: Transaction =
     { id: '',
       senderId: '',
+      sender: getDefaultAccount(),
       receiverId: '',
-      senderName: '',
-      receiverName: '',
-      receiverBranch: '',
-      receiverBank: '',
-      receiverAccountNumber: '',
+      receiver: getDefaultAccount(),
       rate: 0,
       transferred: false,
       paid: false,
@@ -252,6 +257,7 @@ export default class Transactions extends Vue {
       this.senderTypeahead.items = (await axios.get('/services/account', {
         params: {name: query},
       })).data;
+      this.accounts = {...this.accounts, ...(_keyBy(this.senderTypeahead.items, 'id'))};
       this.senderTypeahead.loading = false;
     }
   }
@@ -260,7 +266,12 @@ export default class Transactions extends Vue {
     if (senderId.length < 1) {
       return;
     }
-    const sender: any = _find(this.senderTypeahead.items, (senderObj) => senderObj.id === senderId);
+    const sender: Account | undefined = _find(this.accounts, (senderObj) => senderObj.id === senderId);
+
+    if (!sender) {
+      return;
+    }
+
     this.usdToIdr = sender.location === 'USA';
     this.editedItem.rate = this.usdToIdr ? this.currentRate.usdToIdrRounded : this.currentRate.idrToUsdRounded;
   }
@@ -272,6 +283,7 @@ export default class Transactions extends Vue {
       this.receiverTypeahead.items = (await axios.get('/services/account', {
         params: {name: query},
       })).data;
+      this.accounts = {...this.accounts, ...(_keyBy(this.senderTypeahead.items, 'id'))};
       this.receiverTypeahead.loading = false;
     }
   }
@@ -285,18 +297,26 @@ export default class Transactions extends Vue {
     this.editedIndex = this.transactions.indexOf(item);
     this.editedItem = Object.assign({}, item);
     this.senderTypeahead.items = [
-      { name: item.senderName, id: item.senderId },
+      { name: item.sender.name, id: item.senderId },
     ];
     this.receiverTypeahead.items = [
-      { name: item.receiverName, id: item.receiverId },
+      { name: item.receiver.name, id: item.receiverId },
     ];
     this.dialog = true;
   }
 
-  private deleteItem(item: any) {
+  private async deleteItem(item: any) {
     const index = this.transactions.indexOf(item);
     if (confirm('Are you sure you want to delete this item?')) {
-      this.transactions.splice(index, 1);
+      const res: any = await axios.delete('/services/transaction', {data: {id: item.id}});
+      if (res) {
+        const removedIndex: number = _findIndex(this.transactions, (transaction: Transaction) => {
+          return transaction.id === item.id;
+        });
+        this.transactions.splice(removedIndex, 1);
+      } else {
+        alert('Failed to delete transaction');
+      }
     }
   }
 
@@ -312,11 +332,11 @@ export default class Transactions extends Vue {
   private async save() {
     try {
       if (this.editedIndex > -1) {
-        const res: any = await axios.put('/services/transaction', this.editedItem);
+        await axios.put('/services/transaction', this.editedItem);
         Object.assign(this.transactions[this.editedIndex], this.editedItem);
       } else {
-        const res: any = await axios.post('/services/transaction', this.editedItem);
-        this.transactions.push(this.editedItem);
+        const newTransaction: Transaction = (await axios.post('/services/transaction', this.editedItem)).data;
+        this.transactions.push(newTransaction);
       }
       this.close();
     } catch (err) {
@@ -328,10 +348,11 @@ export default class Transactions extends Vue {
     const usdAmount: string = this.editedItem.usdAmount!.toLocaleString();
     const idrAmount: string = this.editedItem.idrAmount!.toLocaleString();
     const msg =
-`${this.editedItem.receiverName}
-${this.editedItem.receiverBank} ${this.editedItem.receiverBranch || ''} ${this.editedItem.receiverAccountNumber}
+`${this.editedItem.receiver.name}
+${this.editedItem.receiver.bank || ''} ${this.editedItem.receiver.branch || ''} \
+    ${this.editedItem.receiver.accountNumber}
 Kirim \$${usdAmount} x Rp ${this!.editedItem.rate.toLocaleString()} = Rp ${idrAmount}
-dari ${this.editedItem.senderName}`;
+dari ${this.editedItem.sender.name}`;
 
     clipboard.writeText(msg);
   }
