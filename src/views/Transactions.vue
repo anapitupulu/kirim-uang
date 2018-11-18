@@ -50,18 +50,18 @@
                   <v-flex xs12 sm6 md4>
                     <v-layout row>
                       <v-flex>
-                        <v-text-field v-model="editedItem.usdAmount" label="Enter US$ amount" @input="adjustIdrAmount"></v-text-field>
+                        <v-text-field v-model="editedItem.usdAmount" type="number" pattern="[0-9]*" label="Enter US$ amount" @input="adjustIdrAmount"></v-text-field>
                       </v-flex>
                         <v-flex>
-                          <v-text-field v-model="editedItem.idrAmount" label="Enter Rupiah amount" @input="adjustUsdAmount"></v-text-field>
+                          <v-text-field v-model="editedItem.idrAmount" type="number" pattern="[0-9]*" label="Enter Rupiah amount" @input="adjustUsdAmount"></v-text-field>
                         </v-flex>
                     </v-layout>
                   </v-flex>
                   <v-flex xs12 sm6 md4 v-show="usdToIdr">
-                    <v-text-field v-model="editedItem.usdFee" label="Enter US$ fee"></v-text-field>
+                    <v-text-field v-model="editedItem.usdFee" type="number" pattern="[0-9]*" label="Enter US$ fee"></v-text-field>
                   </v-flex>
                   <v-flex xs12 sm6 md4 v-show="!usdToIdr">
-                    <v-text-field v-model="editedItem.idrFee" label="Enter Rupiah fee"></v-text-field>
+                    <v-text-field v-model="editedItem.idrFee" type="number" pattern="[0-9]*" label="Enter Rupiah fee"></v-text-field>
                   </v-flex>
                   <v-flex xs12 sm6 md4>
                     <v-layout row>
@@ -102,27 +102,27 @@
       class="elevation-1"
     >
       <template slot="items" slot-scope="props">
-        <td class="text-xs-right">{{ props.item.sender.name }}</td>
-        <td class="text-xs-right">{{ props.item.receiver.name }}</td>
-        <td class="text-xs-right">{{ props.item.usdAmount }}</td>
-        <td class="text-xs-right">{{ props.item.idrAmount }}</td>
-        <td class="text-xs-right">{{ props.item.transferred }}</td>
-        <td class="text-xs-right">{{ props.item.paid }}</td>
         <td class="justify-center layout px-0">
           <v-icon
-            small
+            medium
             class="mr-2"
             @click="editItem(props.item)"
           >
             edit
           </v-icon>
           <v-icon
-            small
+            medium
             @click="deleteItem(props.item)"
           >
             delete
           </v-icon>
         </td>
+        <td class="text-xs-right">{{ props.item.sender.name }}</td>
+        <td class="text-xs-right">{{ props.item.receiver.name }}</td>
+        <td class="text-xs-right">{{ props.item.usdAmount }}</td>
+        <td class="text-xs-right">{{ props.item.idrAmount }}</td>
+        <td class="text-xs-right">{{ props.item.transferred }}</td>
+        <td class="text-xs-right">{{ props.item.paid }}</td>
       </template>
       <template slot="no-data">
         <v-btn color="primary" @click="initialize">Reload</v-btn>
