@@ -88,16 +88,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-
-export interface Account {
-  id: string;
-  name: string;
-  bank: string;
-  accountNumber: string;
-  branch: string;
-  location: string;
-  phone: string;
-}
+import {Account} from '../store/account';
 
 @Component({})
 export default class Accounts extends Vue {

@@ -134,27 +134,11 @@
 import _map from 'lodash/map';
 import _find from 'lodash/find';
 import _keyBy from 'lodash/keyBy';
-import _findIndex from 'lodash/findIndex';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 import clipboard from 'clipboard-polyfill';
-import {Account} from './Accounts.vue';
-
-interface Transaction {
-  id: string;
-  senderId: string;
-  sender: Account;
-  receiverId: string;
-  receiver: Account;
-  usdAmount?: number;
-  idrAmount?: number;
-  rate: number;
-  transferred: boolean;
-  paid: boolean;
-  usdFee?: number;
-  idrFee?: number;
-  notes?: string;
-}
+import {Transaction} from '../store/transaction';
+import {Account, getDefaultAccount} from '../store/account';
 
 interface TypeaheadStates {
   loading: boolean;
@@ -163,17 +147,6 @@ interface TypeaheadStates {
   selected: string;
 }
 
-function getDefaultAccount() {
-  return {
-    id: '',
-    name: '',
-    bank: '',
-    accountNumber: '',
-    branch: '',
-    location: '',
-    phone: '',
-  };
-}
 
 @Component({})
 export default class Transactions extends Vue {
@@ -194,7 +167,6 @@ export default class Transactions extends Vue {
     { text: 'Paid', value: 'paid', sortable: true },
     { text: 'Notes', value: 'notes', sortable: true },
   ];
-  private transactions: Transaction[] = [];
   private editedIndex: number = -1;
   private editedItem: Transaction =
     { id: '',
@@ -288,8 +260,12 @@ export default class Transactions extends Vue {
     }
   }
 
+  private get transactions(): Transaction[] {
+    return this.$store.state.transaction.transactions;
+  }
+
   private async initialize() {
-    this.transactions = (await axios.get('/services/transaction')).data;
+    this.$store.dispatch('transaction/initializeTransactions');
     this.currentRate = (await axios.get('/services/rate/latest')).data[0];
   }
 
@@ -308,15 +284,9 @@ export default class Transactions extends Vue {
   private async deleteItem(item: any) {
     const index = this.transactions.indexOf(item);
     if (confirm('Are you sure you want to delete this item?')) {
-      const res: any = await axios.delete('/services/transaction', {data: {id: item.id}});
-      if (res) {
-        const removedIndex: number = _findIndex(this.transactions, (transaction: Transaction) => {
-          return transaction.id === item.id;
-        });
-        this.transactions.splice(removedIndex, 1);
-      } else {
+      this.$store.dispatch('transaction/removeTransaction', item.id).catch((error: Error) => {
         alert('Failed to delete transaction');
-      }
+      });
     }
   }
 
@@ -332,11 +302,10 @@ export default class Transactions extends Vue {
   private async save() {
     try {
       if (this.editedIndex > -1) {
-        await axios.put('/services/transaction', this.editedItem);
-        Object.assign(this.transactions[this.editedIndex], this.editedItem);
+        this.$store.dispatch('transaction/updateTransaction',
+          {editedIndex: this.editedIndex, editedTransaction: this.editedItem});
       } else {
-        const newTransaction: Transaction = (await axios.post('/services/transaction', this.editedItem)).data;
-        this.transactions.push(newTransaction);
+        this.$store.dispatch('transaction/addTransaction', this.editedItem);
       }
       this.close();
     } catch (err) {
