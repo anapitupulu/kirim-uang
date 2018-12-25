@@ -38,19 +38,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+import { Component, Vue, Watch } from 'vue-property-decorator';
 
-@Component({
-  components: {
-    HelloWorld,
-  },
-})
+@Component({})
 export default class Home extends Vue {
   private drawer: boolean = false;
   private source: string = '';
 
   private goToLogin() {
+    this.$router.push({name: 'login'});
+  }
+
+  private get isLoggedIn() {
+    return this.$store.state.loggedIn;
+  }
+
+  @Watch('isLoggedIn') 
+  onIsLoggedInChanged() {
     this.$router.push({name: 'login'});
   }
 }

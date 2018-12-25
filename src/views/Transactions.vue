@@ -136,7 +136,7 @@ import _map from 'lodash/map';
 import _find from 'lodash/find';
 import _keyBy from 'lodash/keyBy';
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import axios from 'axios';
+import axios from '../core/axios-instance';
 import clipboard from 'clipboard-polyfill';
 import {Transaction} from '../store/transaction';
 import {Account, getDefaultAccount} from '../store/account';

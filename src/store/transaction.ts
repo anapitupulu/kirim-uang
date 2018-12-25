@@ -1,5 +1,5 @@
 import _findIndex from 'lodash/findIndex';
-import axios from 'axios';
+import axios from '../core/axios-instance';
 import {MutationTree, ActionTree, ActionContext} from 'vuex';
 import {Account} from './account';
 

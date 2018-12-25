@@ -6,11 +6,14 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    loggedIn: null,
   },
   mutations: {
+    setLoggedIn(state, loggedIn) {
+      state.loggedIn = loggedIn;
+    },
   },
   actions: {
-
   },
   modules: {
     transaction,
