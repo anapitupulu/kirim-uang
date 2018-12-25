@@ -35,6 +35,7 @@
                     :items="receiverTypeahead.items"
                     :search-input.sync="receiverTypeahead.searchQuery"
                     v-model="editedItem.receiverId"
+                    @input="onReceiverSelected"
                     item-text="name"
                     item-value="id"
                     cache-items
@@ -243,9 +244,23 @@ export default class Transactions extends Vue {
     if (!sender) {
       return;
     }
+    this.editedItem.sender = sender;
 
     this.usdToIdr = sender.location === 'USA';
     this.editedItem.rate = this.usdToIdr ? this.currentRate.usdToIdrRounded : this.currentRate.idrToUsdRounded;
+  }
+
+  private onReceiverSelected(receiverId: string) {
+    if (receiverId.length < 1) {
+     return;
+    }
+
+    const receiver: Account | undefined = _find(this.accounts, (receiverObj) => receiverObj.id === receiverId);
+
+    if (!receiver) {
+      return;
+    }
+    this.editedItem.receiver = receiver;
   }
 
   @Watch('receiverTypeahead.searchQuery')
